@@ -1,9 +1,11 @@
 from transformers import pipeline
+from app.core.config import settings
+from app.core.logger import logger
 
 # Load models once when app starts
 summarizer = pipeline(
     "text-generation",
-    model="google/flan-t5-small"
+    model=settings.MODEL_NAME
 )
 
 sentiment_analyzer = pipeline(
@@ -11,13 +13,19 @@ sentiment_analyzer = pipeline(
 )
 
 def summarize_text(text: str) -> str:
-    prompt = f"Summarize the following text:\n\n{text}"
-    result = summarizer(
-        prompt,
-        max_new_tokens=150,
-        do_sample=False
-    )
-    return result[0]["generated_text"]
+    try:
+        prompt = f"Summarize the following text:\n\n{text}"
+        result = summarizer(
+            prompt,
+            max_new_tokens=settings.MAX_NEW_TOKENS,
+            do_sample=False
+        )
+        return result[0]["generated_text"]
+    except Exception as e:
+        logger.error(f"Error summarizing text: {e}")
+        raise
+
+    
 
 
 def extract_keywords(text: str) -> list:
@@ -35,4 +43,5 @@ def extract_keywords(text: str) -> list:
 
 def analyze_sentiment(text: str) -> dict:
     result = sentiment_analyzer(text)
+    logger.info("Analyzing sentiment")
     return result[0]
