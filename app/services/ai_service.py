@@ -1,6 +1,8 @@
 from transformers import pipeline
 from app.core.config import settings
 from app.core.logger import logger
+import logging
+logger = logging.getLogger(__name__)
 
 # Load models once when app starts
 summarizer = pipeline(

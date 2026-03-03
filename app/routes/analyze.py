@@ -1,11 +1,16 @@
 from fastapi import APIRouter
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from app.services.ai_service import summarize_text, extract_keywords, analyze_sentiment
 
 router = APIRouter()
 
 class TextRequest(BaseModel):
-    text: str
+    text: str = Field(
+        ..., 
+        min_length=10,
+        max_length=5000,
+        description="Text must be between 10 and 5000 characters"
+        )
 
 @router.post("/summarize")
 def summarize(request: TextRequest):
