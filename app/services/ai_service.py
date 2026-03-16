@@ -5,15 +5,30 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Load models once when app starts
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+summarizer = pipeline("summarization", model="google/flan-t5-small")
 
 sentiment_analyzer = pipeline(
     "sentiment-analysis"
 )
 
-def summarize_text(text: str):
-    result = summarizer(text, max_length=120, min_length=30, do_sample=False)
-    return result[0]["summary_text"]
+def summarize_text(text: str) -> str:
+    try:
+        logger.info("Summarizing text")
+
+        prompt = f"Summarize the following text:\n\n{text}"
+
+        result = summarizer(
+            text,
+            max_length=120,
+            min_length=30,
+            do_sample=False
+        )
+
+        return result[0]["summary_text"]
+
+    except Exception as e:
+        logger.error(f"Error during summarization: {str(e)}")
+        raise
 
 
 def extract_keywords(text: str) -> list:

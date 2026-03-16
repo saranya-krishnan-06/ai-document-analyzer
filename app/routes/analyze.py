@@ -1,9 +1,39 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, UploadFile, File
 from pydantic import BaseModel, Field
 from app.services.ai_service import summarize_text, extract_keywords, analyze_sentiment
-
+from app.services.file_service import extract_text_from_file
+from app.utils.file_parser import (
+    extract_text_from_txt,
+    extract_text_from_docx,
+    extract_text_from_pdf
+)
 router = APIRouter()
+@router.post("/file")
+async def analyze_file(file: UploadFile = File(...)):
 
+    filename = file.filename.lower()
+
+    if filename.endswith(".txt"):
+        text = extract_text_from_txt(file.file)
+
+    elif filename.endswith(".docx"):
+        text = extract_text_from_docx(file.file)
+
+    elif filename.endswith(".pdf"):
+        text = extract_text_from_pdf(file.file)
+
+    else:
+        return {"error": "Unsupported file type"}
+
+    summary = summarize_text(text)
+    sentiment = analyze_sentiment(text)
+    keywords = extract_keywords(text)
+
+    return {
+        "summary": summary,
+        "sentiment": sentiment,
+        "keywords": keywords
+    }
 class TextRequest(BaseModel):
     text: str = Field(
         ..., 

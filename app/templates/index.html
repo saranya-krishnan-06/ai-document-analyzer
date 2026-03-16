@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Document Analyzer</title>
+</head>
+
+<body>
+
+<h2>AI Document Analyzer</h2>
+
+<h3>Paste Text</h3>
+
+<textarea id="text" rows="8" cols="80"></textarea><br><br>
+
+<button onclick="analyzeText()">Analyze Text</button>
+
+<hr>
+
+<h3>Upload File</h3>
+
+<input type="file" id="file">
+<button onclick="uploadFile()">Upload & Analyze</button>
+
+<hr>
+
+<h3>Result</h3>
+
+<pre id="result"></pre>
+
+<script>
+
+async function analyzeText() {
+
+    let text = document.getElementById("text").value;
+
+    let response = await fetch("/analyze/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: text })
+    });
+
+    let data = await response.json();
+
+    document.getElementById("result").innerText =
+        JSON.stringify(data, null, 2);
+}
+
+async function uploadFile() {
+
+    const fileInput = document.getElementById("fileUpload");
+    const file = fileInput.files[0]
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch("/analyze/file", {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await response.json();
+
+    document.getElementById("summary").innerText = data.summary
+    document.getElementById("keywords").innerText = data.keywords
+    document.getElementById("sentiment").innerText = data.sentiment.label
+}
+
+</script>
+
+</body>
+</html>
