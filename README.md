@@ -102,3 +102,32 @@ This Project demonstrates:
     Production mindset
     DevOps preparation
 
+CI Pipeline with GitHub Actions
+
+On Day 3, a Continuous Integration (CI) pipeline was added using GitHub Actions.
+
+What was implemented
+
+Automatic testing using pytest
+
+Dependency installation via requirements.txt
+
+CI pipeline triggered on every push to main
+
+Workflow
+
+Every time code is pushed:
+
+GitHub Actions checks out the repository
+
+Python environment is created
+
+Dependencies are installed
+
+Unit tests are executed
+
+This ensures the API remains stable and prevents broken code from entering the repository.
+
+Result
+
+The CI pipeline successfully runs and validates the project automatically.
