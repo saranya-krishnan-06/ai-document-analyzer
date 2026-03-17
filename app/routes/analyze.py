@@ -2,6 +2,9 @@ from fastapi import APIRouter, UploadFile, File
 from pydantic import BaseModel, Field
 from app.services.ai_service import summarize_text, extract_keywords, analyze_sentiment
 from app.services.file_service import extract_text_from_file
+from app.services.vector_store import add_documents
+from app.utils.text_chunker import split_text
+from app.services.vector_store import search
 from app.utils.file_parser import (
     extract_text_from_txt,
     extract_text_from_docx,
@@ -24,7 +27,10 @@ async def analyze_file(file: UploadFile = File(...)):
 
     else:
         return {"error": "Unsupported file type"}
-
+    
+    chunks = split_text(text)
+    add_documents(chunks)
+    
     summary = summarize_text(text)
     sentiment = analyze_sentiment(text)
     keywords = extract_keywords(text)
@@ -51,7 +57,28 @@ def summarize(request: TextRequest):
 def keywords(request: TextRequest):
     result = extract_keywords(request.text)
     return {"keywords": result}
+@router.post("/chat")
+def chat_with_document(question: str):
 
+    context_chunks = search(question)
+
+    context = "\n".join(context_chunks)
+
+    prompt = f"""
+Answer the question using the document context.
+
+Context:
+{context}
+
+Question:
+{question}
+"""
+
+    result = summarize(prompt, max_length=150)
+
+    return {
+        "answer": result[0]["summary_text"]
+    }
 @router.post("/sentiment")
 def sentiment(request: TextRequest):
     result = analyze_sentiment(request.text)

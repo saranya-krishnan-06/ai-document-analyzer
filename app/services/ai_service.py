@@ -1,11 +1,13 @@
 from transformers import pipeline
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from app.core.config import settings
 from app.core.logger import logger
 import logging
 logger = logging.getLogger(__name__)
 
-# Load models once when app starts
-summarizer = pipeline("summarization", model="google/flan-t5-small")
+tokenizer = AutoTokenizer.from_pretrained("google/flan-t5-small")
+model = AutoModelForSeq2SeqLM.from_pretrained("google/flan-t5-small")
+
 
 sentiment_analyzer = pipeline(
     "sentiment-analysis"
@@ -17,14 +19,17 @@ def summarize_text(text: str) -> str:
 
         prompt = f"Summarize the following text:\n\n{text}"
 
-        result = summarizer(
-            text,
-            max_length=120,
-            min_length=30,
-            do_sample=False
+        inputs = tokenizer(prompt, return_tensors="pt", truncation=True)
+
+        outputs = model.generate(
+            **inputs,
+            max_new_tokens=60
         )
 
-        return result[0]["summary_text"]
+        summary = tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+
+        return summary
 
     except Exception as e:
         logger.error(f"Error during summarization: {str(e)}")
