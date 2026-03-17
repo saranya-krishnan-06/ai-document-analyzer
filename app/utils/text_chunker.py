@@ -1,4 +1,4 @@
-def split_text(text, chunk_size=500):
+def split_text(text, chunk_size=150, overlap=50):
     words = text.split()
     chunks = []
 

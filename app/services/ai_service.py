@@ -1,3 +1,4 @@
+#app/services/ai_service.py
 from transformers import pipeline
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from app.core.config import settings
@@ -5,8 +6,17 @@ from app.core.logger import logger
 import logging
 logger = logging.getLogger(__name__)
 
-tokenizer = AutoTokenizer.from_pretrained("google/flan-t5-small")
-model = AutoModelForSeq2SeqLM.from_pretrained("google/flan-t5-small")
+tokenizer = None
+model = None
+
+def get_model():
+    global tokenizer, model
+
+    if tokenizer is None or model is None:
+        tokenizer = AutoTokenizer.from_pretrained("google/flan-t5-small")
+        model = AutoModelForSeq2SeqLM.from_pretrained("google/flan-t5-small")
+
+    return tokenizer, model
 
 
 sentiment_analyzer = pipeline(
@@ -16,6 +26,7 @@ sentiment_analyzer = pipeline(
 def summarize_text(text: str) -> str:
     try:
         logger.info("Summarizing text")
+        tokenizer, model = get_model()
 
         prompt = f"Summarize the following text:\n\n{text}"
 
@@ -23,7 +34,8 @@ def summarize_text(text: str) -> str:
 
         outputs = model.generate(
             **inputs,
-            max_new_tokens=60
+            max_new_tokens=60,
+            temperature=0.3
         )
 
         summary = tokenizer.decode(outputs[0], skip_special_tokens=True)
