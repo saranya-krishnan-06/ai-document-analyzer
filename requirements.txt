@@ -1,6 +1,7 @@
 fastapi
 uvicorn
 python-dotenv
+numpy<2
 
 # AI
 transformers
