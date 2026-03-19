@@ -4,7 +4,7 @@ python-dotenv
 
 # AI
 transformers
-torch==2.2.2 --index-url https://download.pytorch.org/whl/cpu
+
 sentence-transformers
 faiss-cpu
 
