@@ -17,3 +17,6 @@ python-multipart
 
 # Config
 pydantic-settings
+jinja2
+pytest
+httpx
