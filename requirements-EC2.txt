@@ -7,5 +7,3 @@ python-multipart
 pypdf
 python-docx
 numpy<2
-transformers
-torch --index-url https://download.pytorch.org/whl/cpu
