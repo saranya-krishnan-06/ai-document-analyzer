@@ -1,3 +1,4 @@
+#requirements-EC2.txt
 fastapi
 uvicorn
 python-dotenv

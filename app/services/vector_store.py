@@ -1,3 +1,4 @@
+#app/services/vector_store.py
 import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
