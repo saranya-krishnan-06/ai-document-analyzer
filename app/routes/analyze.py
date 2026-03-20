@@ -4,7 +4,7 @@ from fastapi import APIRouter, UploadFile, File
 from pydantic import BaseModel, Field
 from app.services.ai_service import summarize_text, extract_keywords, analyze_sentiment
 from app.services.file_service import extract_text_from_file
-from app.services.vector_store import add_documents
+#from app.services.vector_store import add_documents
 from app.utils.text_chunker import split_text
 from app.services.vector_store import search
 from app.utils.file_parser import (
@@ -30,8 +30,8 @@ async def analyze_file(file: UploadFile = File(...)):
     else:
         return {"error": "Unsupported file type"}
     
-    chunks = split_text(text)
-    add_documents(chunks)
+    #chunks = split_text(text)
+    #add_documents(chunks)
     
     summary = summarize_text(text)
     sentiment = analyze_sentiment(text)
