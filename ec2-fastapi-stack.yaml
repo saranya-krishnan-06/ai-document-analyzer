@@ -1,0 +1,128 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AI Document Analyzer EC2 deployment
+
+Parameters:
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Existing EC2 KeyPair name
+  InstanceType:
+    Type: String
+    Default: t3.small
+    AllowedValues:
+      - t2.micro
+      - t3.micro
+      - t3.small
+      - t3.medium
+    Description: EC2 instance type
+  LatestUbuntuAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id
+
+Resources:
+  AppSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH, HTTP, and FastAPI app traffic
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 8000
+          ToPort: 8000
+          CidrIp: 0.0.0.0/0
+
+  AppInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref LatestUbuntuAmiId
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyName
+      SecurityGroupIds:
+        - !Ref AppSecurityGroup
+      Tags:
+        - Key: Name
+          Value: ai-document-analyzer-cfn
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -eux
+
+          export DEBIAN_FRONTEND=noninteractive
+
+          apt-get update
+          apt-get upgrade -y
+          apt-get install -y python3-pip python3-venv git nginx
+
+          cd /home/ubuntu
+          if [ ! -d ai-document-analyzer ]; then
+            git clone https://github.com/saranya-krishnan-06/ai-document-analyzer.git
+          fi
+
+          cd /home/ubuntu/ai-document-analyzer
+
+          python3 -m venv venv
+          /home/ubuntu/ai-document-analyzer/venv/bin/pip install --upgrade pip
+          /home/ubuntu/ai-document-analyzer/venv/bin/pip install --no-cache-dir -r requirements-EC2.txt
+          /home/ubuntu/ai-document-analyzer/venv/bin/pip install --no-cache-dir jinja2
+
+          cat >/etc/systemd/system/ai-document-analyzer.service <<'EOF'
+          [Unit]
+          Description=AI Document Analyzer FastAPI app
+          After=network.target
+
+          [Service]
+          User=ubuntu
+          Group=ubuntu
+          WorkingDirectory=/home/ubuntu/ai-document-analyzer
+          Environment="PATH=/home/ubuntu/ai-document-analyzer/venv/bin"
+          ExecStart=/home/ubuntu/ai-document-analyzer/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
+          Restart=always
+
+          [Install]
+          WantedBy=multi-user.target
+          EOF
+
+          systemctl daemon-reload
+          systemctl enable ai-document-analyzer
+          systemctl start ai-document-analyzer
+
+          cat >/etc/nginx/sites-available/default <<'EOF'
+          server {
+              listen 80 default_server;
+              listen [::]:80 default_server;
+
+              server_name _;
+
+              location / {
+                  proxy_pass http://127.0.0.1:8000;
+                  proxy_http_version 1.1;
+                  proxy_set_header Upgrade $http_upgrade;
+                  proxy_set_header Connection "upgrade";
+                  proxy_set_header Host $host;
+                  proxy_cache_bypass $http_upgrade;
+              }
+          }
+          EOF
+
+          nginx -t
+          systemctl enable nginx
+          systemctl restart nginx
+
+Outputs:
+  InstanceId:
+    Description: EC2 Instance ID
+    Value: !Ref AppInstance
+
+  PublicIP:
+    Description: Public IP of the instance
+    Value: !GetAtt AppInstance.PublicIp
+
+  AppURL:
+    Description: Application URL
+    Value: !Sub "http://${AppInstance.PublicIp}/docs"
