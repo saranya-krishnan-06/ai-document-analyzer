@@ -1,12 +1,14 @@
-# AI Document Analyzer
-A production-ready FastAPI-based AI microservice that performs:
+# AI Document Intelligence Platform
+An AI-powered document analysis and question-answering platform built using FastAPI, HuggingFace Transformers, FAISS, and AWS.
 
- 1.Text Summarization
+This system allows users to upload documents and perform:
 
- 2.Keyword Extraction
+    AI-based document summarization
+    Keyword extraction
+    Sentiment analysis
+    Context-aware document chat (RAG architecture)
 
- 3.Sentiment Analysis
-
+Designed as a cloud-ready backend system with CI/CD automation and modular AI architecture.
 Built with clean architecture principles, configuration management, logging, and testing — designed to reflect real-world backend + DevOps practices.
 
 Goals:
@@ -17,117 +19,168 @@ Goals:
 5.Git & version control best practices
 6.Docker & CI/CD (coming next)
 
-Architecture Overview
-ai-document-analyzer/
-│
-├── app/
-│   ├── core/          # Config & logging
-│   ├── routes/        # API endpoints
-│   ├── services/      # AI logic
-│   └── main.py        # FastAPI app entrypoint
-│
-├── tests/             # Unit tests
-├── pytest.ini         # Test config
-└── README.md
+                ARCHITECTURE OVERVIEW
 
-AI Model
 
-1.Model: google/flan-t5-small
-2.Runs locally (CPU-friendly)
-3.No OpenAI or paid APIs required
-4.Uses HuggingFace Transformers
+User → FastAPI → Text Processing → Embeddings → FAISS
+→ Context Retrieval → LLM → Response
 
-Tech Stack
+Key Architecture Concepts:
 
-1.Python 3.12
-2.FastAPI
-3.HuggingFace Transformers
-4.Pydantic v2
-5.pytest
-6.Git
+Retrieval Augmented Generation (RAG)
+Vector similarity search
+AI service abstraction layer
+Cloud-ready backend design
+Modular inference pipeline
 
-Running Locally
-Step 1️: Clone Repository
-  git clone https://github.com/<your-username>/ai-document-analyzer.git
-  cd ai-document-analyzer
+                  TECH STACK
 
-Step 2: Create Virtual Environment
-  python -m venv venv
-  source venv/Scripts/activate   # Windows Git Bash
+Backend
 
-Step 3: Install Dependencies 
-  pip install -r requirements.txt
+    FastAPI
+    Python
+    Uvicorn
 
-Step 4: Start Server
-  uvicorn app.main:app --reload
+AI / NLP
 
-Step 5: Open browser:http://127.0.0.1:8000/docs 
+    HuggingFace Transformers
+    FLAN-T5
+    Sentence Transformers
+    FAISS
 
-API Endpoints
+Document Processing
 
-Summarize Text : POST /analyze/summarize
-Extract Keywords : POST /analyze/keywords
-Analyze Sentiment : POST /analyze/sentiment 
+    PyPDF
+    python-docx
 
-Configuration Management
-Uses Pydantic v2 settings:
-    MODEL_NAME = "google/flan-t5-small"
-    MAX_NEW_TOKENS = 150
+DevOps
 
-Production-Ready Features
+    GitHub Actions (CI/CD)
+    AWS EC2
 
-    Structured logging
-    Error handling
-    Config abstraction
-    Modular architecture
-    Test coverage
-    Git workflow management
+Testing
 
-Next Steps
-    Dockerize application
-    Add GitHub Actions CI pipeline
-    Add health checks & metrics
-    Deploy to container environment
+    Pytest
+
+                    FEATURES
+Document Processing
+    Supports PDF, DOCX, and TXT
+    Automatic text extraction
+    Intelligent text chunking
+    Vector embedding generation
+
+AI Capabilities
+
+    Transformer-based summarization (FLAN-T5)
+    Keyword extraction using NLP heuristics
+    Sentiment analysis pipeline
+    Contextual document Q&A using RAG
+
+Vector Search
+
+    Semantic search using Sentence Transformers
+    FAISS vector indexing
+    Relevant chunk retrieval for LLM prompts
+
+Document Chat
+
+    Ask questions about uploaded documents
+    Context-aware responses
+    Retrieval-Augmented Generation design
+
+Web Interface
+
+    Lightweight UI for:
+    File upload
+    Text analysis
+    Document chat
+
+DevOps
+
+    CI pipeline using GitHub Actions
+    Automated testing with Pytest
+    AWS EC2 deployment
+    Modular architecture for scaling AI services
+
+         PROJECT STRUCTURE
+ app/
+ ├── routes/
+ │     ├── analyze.py
+ │     ├── document_chat.py
+ │
+ ├── services/
+ │     ├── ai_service.py
+ │     ├── document_chat_service.py
+ │
+ ├── utils/
+ │     ├── file_parser.py
+ │     ├── text_chunker.py
+ │
+ ├── core/
+ │     ├── config.py
+ │     ├── logger.py
+ │
+ ├── templates/
+ │     ├── index.html
+ │
+ └── main.py
+
+tests/
+requirements.txt
+Dockerfile (optional)
+.github/workflows/
+
+            Getting Started
+Clone Repository
+    git clone https://github.com/<your-username>/ai-document-analyzer.git
+    cd ai-document-analyzer
+Create Virtual Environment
+    python -m venv venv
+    source venv/bin/activate   # Mac/Linux
+    venv\Scripts\activate      # Windows
+Install Dependencies
+    pip install -r requirements.txt
+    Run Application
+    uvicorn app.main:app --reload
+
+Open:
+    http://127.0.0.1:8000
+
+Running Tests
+    pytest
+
+Deployment
+
+The application can be deployed on:
+
+    AWS EC2
+    Docker containers
+    Future support for:
+      AWS ECS
+      Kubernetes 
+
+Future Improvements
+    Streaming LLM responses
+    Multi-document chat memory
+    Vector database (Pinecone / Weaviate)
+    Async embedding pipeline
+    Production inference service
+    CloudFormation / Terraform infra
+    Model quantization for low-cost deployment
+
+Future Improvements
+
+    Streaming LLM responses
+    Multi-document chat memory
+    Vector database (Pinecone / Weaviate)
+    Async embedding pipeline
+    Production inference service
+    CloudFormation / Terraform infra
+    Model quantization for low-cost deployment
+
 
 Author
 
 Saranya Krishnan
 Cloud Engineer | AWS | Backend | DevOps Enthusiast
 
-This Project demonstrates: 
-    Backend engineering
-    Clean architecture
-    Dependency debugging
-    Git conflict resolution
-    Production mindset
-    DevOps preparation
-
-CI Pipeline with GitHub Actions
-
-On Day 3, a Continuous Integration (CI) pipeline was added using GitHub Actions.
-
-What was implemented
-
-Automatic testing using pytest
-
-Dependency installation via requirements.txt
-
-CI pipeline triggered on every push to main
-
-Workflow
-
-Every time code is pushed:
-
-GitHub Actions checks out the repository
-
-Python environment is created
-
-Dependencies are installed
-
-Unit tests are executed
-
-This ensures the API remains stable and prevents broken code from entering the repository.
-
-Result
-
-The CI pipeline successfully runs and validates the project automatically.
