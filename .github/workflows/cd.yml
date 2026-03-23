@@ -13,13 +13,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Write SSH key
+      - name: Setup SSH key
         shell: bash
         run: |
+          set -x
           mkdir -p "$HOME/.ssh"
           printf "%s" "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > "$HOME/.ssh/ec2_key.pem"
           chmod 600 "$HOME/.ssh/ec2_key.pem"
-          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> "$HOME/.ssh/known_hosts"
+          ls -l "$HOME/.ssh"
+          wc -c "$HOME/.ssh/ec2_key.pem"
+          ssh-keyscan -T 10 -H "${{ secrets.EC2_HOST }}" >> "$HOME/.ssh/known_hosts"
+
+      - name: Test SSH connection
+        shell: bash
+        run: |
+          ssh -o StrictHostKeyChecking=yes -i "$HOME/.ssh/ec2_key.pem" "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" "echo SSH_OK"
 
       - name: Deploy to EC2
         shell: bash
