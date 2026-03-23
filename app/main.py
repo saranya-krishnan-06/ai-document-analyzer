@@ -14,7 +14,11 @@ app.include_router(analyze_router, prefix="/analyze", tags=["Analyze"])
 #app.include_router(doc_chat_router, prefix="/document")
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={}
+    )
 @app.get("/")
 def read_root():
     return {"message": "AI Document Analyzer is running"}
