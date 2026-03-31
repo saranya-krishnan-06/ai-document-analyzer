@@ -6,7 +6,7 @@ numpy<2
 
 # AI
 transformers
-
+torch
 sentence-transformers
 faiss-cpu
 

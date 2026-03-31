@@ -5,7 +5,7 @@ import faiss
 import numpy as np
 
 # Load embedding model
-embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+#embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # FAISS index
 dimension = 384
@@ -33,29 +33,43 @@ def load_models():
 
 def add_document_chunks(chunks):
     embedding_model, _, _ = load_models()
+
+    if not chunks:
+        return
+    
     vectors = embedding_model.encode(chunks)
-    index.add(np.array(vectors))
+    vectors = np.array(vectors, dtype="float32")
+    index.add(vectors)
 
     for chunk in chunks:
         documents.append(chunk)
 
 
-def search_similar_chunks(query, k=5):
+def search_similar_chunks(query, k=3):
     embedding_model, _, _ = load_models() 
-    query_vector = embedding_model.encode([query])
 
-    distances, indices = index.search(np.array(query_vector), k)
+    if not documents:
+        return[]
+    
+    query_vector = embedding_model.encode([query])
+    query_vector = np.array(query_vector, dtype="float32")
+
+
+    distances, indices = index.search(query_vector, k)
 
     results = []
-    for i, idx in enumerate(indices[0]):
-        if idx < len(documents) and distances[0][i] < 1.5:
+    for idx in indices[0]:
+        if 0 <= idx < len(documents):
             results.append(documents[idx])
 
     return results
 
-def answer_question(question):
-    embedding_model, _, _ = load_models() 
+def answer_question(question: str):
+    _, tokenizer, model = load_models() 
     chunks = search_similar_chunks(question)
+
+    if not chunks:
+        return "I couldn't find relevant information in the uploaded document."
 
     context = " ".join(chunks)
 
@@ -79,9 +93,8 @@ Answer:
 
     inputs = tokenizer(prompt, return_tensors="pt", truncation=True)
 
-    outputs = model.generate(**inputs, max_new_tokens=120)
+    outputs = model.generate(**inputs, max_new_tokens=80)
 
-    answer = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    # Clean unwanted text
-    answer = answer.replace(prompt, "").strip()
+    answer = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
+    
     return answer

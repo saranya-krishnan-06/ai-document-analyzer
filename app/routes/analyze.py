@@ -42,3 +42,28 @@ async def analyze_file(file: UploadFile = File(...)):
         "sentiment": sentiment,
         "keywords": keywords
     }
+class TextRequest(BaseModel):
+    text: str = Field(
+        ...,
+        min_length=10,
+        max_length=5000,
+        description="Text must be between 10 and 5000 characters"
+    )
+
+
+@router.post("/summarize")
+def summarize(request: TextRequest):
+    result = summarize_text(request.text)
+    return {"summary": result}
+
+
+@router.post("/keywords")
+def keywords(request: TextRequest):
+    result = extract_keywords(request.text)
+    return {"keywords": result}
+
+
+@router.post("/sentiment")
+def sentiment(request: TextRequest):
+    result = analyze_sentiment(request.text)
+    return {"sentiment": result}
