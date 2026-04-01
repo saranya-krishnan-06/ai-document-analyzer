@@ -1,45 +1,53 @@
-#app/services/vector_store.py
+# app/services/vector_store.py
 import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
+from app.core.logger import logger
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
+# Load embedding model once — shared across the app
+embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+logger.info("Embedding model loaded: all-MiniLM-L6-v2")
 
-documents = []
-embeddings = None
-index = None
+DIMENSION = 384
+
+# In-memory store — resets on restart
+documents: list[str] = []
+index: faiss.IndexFlatL2 | None = None
 
 
-def add_documents(chunks):
+def add_documents(chunks: list[str]) -> None:
+    """Embed chunks and add them to the FAISS index."""
+    global documents, index
 
-    global documents, embeddings, index
+    if not chunks:
+        return
 
-    vectors = model.encode(chunks)
+    vectors = embedding_model.encode(chunks)
+    vectors = np.array(vectors, dtype="float32")
 
+    if index is None:
+        index = faiss.IndexFlatL2(DIMENSION)
+
+    index.add(vectors)
     documents.extend(chunks)
-
-    if embeddings is None:
-        embeddings = vectors
-    else:
-        embeddings = np.vstack((embeddings, vectors))
-
-    dimension = vectors.shape[1]
-
-    index = faiss.IndexFlatL2(dimension)
-    index.add(embeddings)
+    logger.info(f"Added {len(chunks)} chunks. Total: {len(documents)}")
 
 
-def search(query):
+def search(query: str, k: int = 3) -> list[str]:
+    """Return the k most relevant chunks for a query."""
+    if index is None or len(documents) == 0:
+        logger.warning("Search called but no documents have been added yet.")
+        return []
 
-    global index
+    query_vector = embedding_model.encode([query])
+    query_vector = np.array(query_vector, dtype="float32")
 
-    query_vector = model.encode([query])
-
-    distances, indices = index.search(query_vector, k=3)
+    k = min(k, len(documents))  # can't fetch more than we have
+    distances, indices = index.search(query_vector, k)
 
     results = []
-
     for i in indices[0]:
-        results.append(documents[i])
+        if 0 <= i < len(documents):
+            results.append(documents[i])
 
     return results
