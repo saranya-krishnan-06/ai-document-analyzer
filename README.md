@@ -3,8 +3,8 @@
 A full-stack AI-powered document analysis application built with FastAPI and open-source transformer models. Upload documents or paste text to get instant summaries, keyword extraction, sentiment analysis, and an interactive chat interface powered by retrieval-augmented generation (RAG).
 Live demo: https://ai-doc-analyzer-frontend.s3.us-east-2.amazonaws.com/index.html
 
-![DocMind AI Document Analyzer](Analyze_File.png)
-![DocMind AI Document Analyzer](Summarize_text.png)
+![DocMind AI Document Analyzer] (Analyze_File.png)
+![DocMind AI Document Analyzer] (Summarize_text.png)
 
 
 ## Features
