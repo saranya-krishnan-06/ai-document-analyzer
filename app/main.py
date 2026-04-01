@@ -13,6 +13,14 @@ templates = Jinja2Templates(directory="app/templates")
 
 app = FastAPI(title="AI Document Analyzer")
 
+# Allow S3 frontend to call this API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # replace * with your S3 URL once you have it
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(analyze_router, prefix="/analyze", tags=["Analyze"])
 app.include_router(chat_router, prefix="/ai", tags=["Chat"])
 
