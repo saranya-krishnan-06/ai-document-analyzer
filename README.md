@@ -1,35 +1,39 @@
-# AI Document Analyzer
+# Docmine — AI Document Analyzer
 
 A full-stack AI-powered document analysis application built with FastAPI and open-source transformer models. Upload documents or paste text to get instant summaries, keyword extraction, sentiment analysis, and an interactive chat interface powered by retrieval-augmented generation (RAG).
-Live demo: https://ai-doc-analyzer-frontend.s3.us-east-2.amazonaws.com/index.html
 
-![Analyze File](Analyze_File.png)
-![Summarize Text](Summarize_text.png)
+**Live demo:** https://ai-doc-analyzer-frontend.s3.us-east-2.amazonaws.com/index.html
 
+---
 
 ## Features
 
-Document upload — supports PDF, DOCX, and TXT files
-Text summarization — generates concise summaries using Google flan-t5-small
-Keyword extraction — identifies the most significant terms from any document
-Sentiment analysis — detects positive, negative, or neutral tone
-Document chat (RAG) — ask questions about uploaded documents using FAISS vector search and semantic embeddings
+- **Document upload** — supports PDF, DOCX, and TXT files
+- **Text summarization** — generates concise summaries using Google flan-t5-small
+- **Keyword extraction** — identifies the most significant terms from any document
+- **Sentiment analysis** — detects positive, negative, or neutral tone
+- **Document chat (RAG)** — ask questions about uploaded documents using FAISS vector search and semantic embeddings
 
-## Technology Stack
+---
 
-Tech stack
-Layer                                    Technology
-Backend                                 FastAPI, Python 3.11, Uvicorn
-AI models                               google/flan-t5-small, sentence-transformers/all-MiniLM-L6-v2
-Vector search                           FAISS (Facebook AI Similarity Search)
-File parsing                            pypdf, python-docx
-Frontend                                Vanilla HTML/CSS/JS, hosted on AWS S3
-Infrastructure                          AWS EC2 (t3.small), CloudFront CDN
-CI/CD                                   GitHub Actions
-Process management                      systemd
+## Tech stack
 
-## Project Structure
+| Layer | Technology |
+|---|---|
+| Backend | FastAPI, Python 3.11, Uvicorn |
+| AI models | google/flan-t5-small, sentence-transformers/all-MiniLM-L6-v2 |
+| Vector search | FAISS (Facebook AI Similarity Search) |
+| File parsing | pypdf, python-docx |
+| Frontend | Vanilla HTML/CSS/JS, hosted on AWS S3 |
+| Infrastructure | AWS EC2 (t3.small), CloudFront CDN |
+| CI/CD | GitHub Actions |
+| Process management | systemd |
 
+---
+
+## Architecture
+
+```
 User Browser
      │
      ▼
@@ -44,17 +48,29 @@ EC2 t3.small (FastAPI + Uvicorn)
      ├── flan-t5-small (summarization + sentiment)
      ├── all-MiniLM-L6-v2 (document embeddings)
      └── FAISS index (vector similarity search)
+```
+
+---
+
 ## API endpoints
-Method             Endpoint                 Description
-POST             /analyze/file          Upload and analyze a document
-POST             /analyze/summarize     Summarize text input
-POST             /analyze/keywords      Extract keywords from text
-POST             /analyze/sentiment     Analyze sentiment of text
-POST             /ai/chat               Chat with an uploaded document
-GET              /health                 Health check
 
-## Project Structure
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/analyze/file` | Upload and analyze a document |
+| POST | `/analyze/summarize` | Summarize text input |
+| POST | `/analyze/keywords` | Extract keywords from text |
+| POST | `/analyze/sentiment` | Analyze sentiment of text |
+| POST | `/ai/chat` | Chat with an uploaded document |
+| GET | `/health` | Health check |
 
+Full interactive API documentation available at:
+`https://dwlf85sg0bufi.cloudfront.net/docs`
+
+---
+
+## Project structure
+
+```
 ai-document-analyzer/
 ├── app/
 │   ├── main.py                  # FastAPI app entry point
@@ -80,44 +96,49 @@ ai-document-analyzer/
 │       └── deploy.yml           # CI/CD pipeline
 ├── requirements.txt
 └── README.md
+```
+
+---
 
 ## Local development
 
-1. Clone the repository
-   
-   git clone https://github.com/<your-username>/ai-document-analyzer.git
-   cd ai-document-analyzer
-   
-2. Create and activate a virtual environment
+**Prerequisites:** Python 3.11+
 
-   python -m venv venv
-   source venv/bin/activate  # Windows: venv\Scripts\activate
-   
-3. Install dependencies
+```bash
+# Clone the repository
+git clone https://github.com/saranya-krishnan-06/ai-document-analyzer.git
+cd ai-document-analyzer
 
-   pip install -r requirements.txt
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
-4. Create .env file
+# Install PyTorch CPU-only first (avoids 2GB CUDA download)
+pip install torch --index-url https://download.pytorch.org/whl/cpu
 
-   echo "APP_NAME=AI Document Analyzer
-   MODEL_NAME=google/flan-t5-small
-   MAX_NEW_TOKENS=150" > .env
-   
-5. Run the application
-   
-   uvicorn app.main:app --reload
-   
-6. Open the app in your browser
-   
-   http://localhost:8000/docs to explore the API
-   
+# Install all dependencies
+pip install -r requirements.txt
+
+# Create .env file
+echo "APP_NAME=AI Document Analyzer
+MODEL_NAME=google/flan-t5-small
+MAX_NEW_TOKENS=150" > .env
+
+# Run the app
+uvicorn app.main:app --reload
+```
+
+Open `http://localhost:8000/docs` to explore the API.
+
+---
 
 ## Deployment
 
 The application is deployed on AWS using the following setup:
-Server setup (EC2 t3.small, Ubuntu 22.04):
 
-Add swap for model loading on low-memory instance
+**Server setup (EC2 t3.small, Ubuntu 22.04):**
+```bash
+# Add swap for model loading on low-memory instance
 sudo fallocate -l 4G /swapfile
 sudo chmod 600 /swapfile
 sudo mkswap /swapfile
@@ -128,29 +149,36 @@ python3 -m venv ~/venv
 source ~/venv/bin/activate
 pip install torch --index-url https://download.pytorch.org/whl/cpu
 pip install -r requirements.txt
+```
 
-Process management: systemd service keeps the app running and restarts it automatically on failure.
-CI/CD: GitHub Actions runs tests on every push to main and deploys to EC2 via SSH.
+**Process management:** systemd service keeps the app running and restarts it automatically on failure.
 
+**CI/CD:** GitHub Actions runs tests on every push to `main` and deploys to EC2 via SSH.
 
-## Notes
+---
 
-- The application is designed as a backend-first document intelligence service.
-- Document chat is built on a simple retrieval workflow using text chunking.
-- Current file upload support includes PDF, DOCX, and TXT.
+## Environment variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `APP_NAME` | AI Document Analyzer | Application name |
+| `MODEL_NAME` | google/flan-t5-small | HuggingFace model to use |
+| `MAX_NEW_TOKENS` | 150 | Maximum tokens for generation |
+
+---
 
 ## Key design decisions
 
-Single model for multiple tasks — flan-t5-small handles both summarization and sentiment analysis via prompt engineering, avoiding the memory cost of loading a separate sentiment model on a 2GB RAM instance.
+**Single model for multiple tasks** — flan-t5-small handles both summarization and sentiment analysis via prompt engineering, avoiding the memory cost of loading a separate sentiment model on a 2GB RAM instance.
 
-CPU-only PyTorch — the EC2 t3.small has no GPU. Installing the CPU-only torch build saves ~1.5GB of disk space and works within the instance's memory constraints.
+**CPU-only PyTorch** — the EC2 t3.small has no GPU. Installing the CPU-only torch build saves ~1.5GB of disk space and works within the instance's memory constraints.
 
-In-memory FAISS index — document vectors are stored in memory for fast retrieval. The index resets on server restart, which is acceptable for a personal project. For persistence, faiss.write_index() could be used to save the index to disk.
+**In-memory FAISS index** — document vectors are stored in memory for fast retrieval. The index resets on server restart, which is acceptable for a personal project. For persistence, `faiss.write_index()` could be used to save the index to disk.
 
-One uvicorn worker — running multiple workers would load the AI models multiple times, exhausting the 2GB RAM. A single worker with async routing handles concurrent requests efficiently for low traffic.
+**One uvicorn worker** — running multiple workers would load the AI models multiple times, exhausting the 2GB RAM. A single worker with async routing handles concurrent requests efficiently for low traffic.
 
-## Environment variables
-Variable            Default              Description
-APP_NAME        AI Document Analyzer    Application name
-MODEL_NAME      google/flan-t5-small    HuggingFace model to use
-MAX_NEW_TOKENS   150                    Maximum tokens for generation
+---
+
+## License
+
+MIT
