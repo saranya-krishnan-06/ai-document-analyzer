@@ -5,6 +5,8 @@ A full-stack AI-powered document analysis application built with FastAPI and ope
 **Live demo:** https://ai-doc-analyzer-frontend.s3.us-east-2.amazonaws.com/index.html
 
 ---
+![Analyze File](Analyze_File.png)
+![Summarize Text](Summarize_text.png)
 
 ## Features
 
@@ -150,6 +152,9 @@ source ~/venv/bin/activate
 pip install torch --index-url https://download.pytorch.org/whl/cpu
 pip install -r requirements.txt
 ```
+> **Note:** The frontend `index.html` points to the live API by default. 
+> For local development change the `API` variable in `app/templates/index.html` 
+> to `http://localhost:8000`
 
 **Process management:** systemd service keeps the app running and restarts it automatically on failure.
 
