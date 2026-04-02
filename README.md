@@ -1,4 +1,4 @@
-# Docmine — AI Document Analyzer
+# DocMine — AI Document Analyzer
 
 A full-stack AI-powered document analysis application built with FastAPI and open-source transformer models. Upload documents or paste text to get instant summaries, keyword extraction, sentiment analysis, and an interactive chat interface powered by retrieval-augmented generation (RAG).
 
